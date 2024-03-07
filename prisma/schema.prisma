@@ -1,0 +1,17 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  userId    String
+  guildId   String
+  balance   Int
+  lastDaily DateTime?
+
+  @@id([userId, guildId])
+}
