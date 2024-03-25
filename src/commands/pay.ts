@@ -1,7 +1,7 @@
 import {
   ApplicationCommandOptionType,
-  User,
   type CommandInteraction,
+  GuildMember,
 } from "discord.js";
 import { Discord, Slash, SlashOption } from "discordx";
 import { prisma } from "../main.js";
@@ -19,7 +19,7 @@ export class Pay {
       required: true,
       type: ApplicationCommandOptionType.User,
     })
-    user: User,
+    user: GuildMember,
     @SlashOption({
       description: "amount to pay",
       name: "amount",
@@ -29,18 +29,20 @@ export class Pay {
     amount: number,
     interaction: CommandInteraction
   ): Promise<void> {
+    await interaction.deferReply({
+      ephemeral: true,
+    });
+
     if (amount <= 0) {
-      await interaction.reply({
+      await interaction.editReply({
         content: "You can't pay a negative amount",
-        ephemeral: true,
       });
       return;
     }
 
     if (interaction.user.id === user.id) {
-      await interaction.reply({
+      await interaction.editReply({
         content: "You can't pay yourself",
-        ephemeral: true,
       });
       return;
     }
@@ -58,9 +60,8 @@ export class Pay {
     });
 
     if (!sender || sender.balance < amount) {
-      await interaction.reply({
+      await interaction.editReply({
         content: "You don't have enough money",
-        ephemeral: true,
       });
       return;
     }
@@ -99,10 +100,9 @@ export class Pay {
         },
       }),
     ]);
-
-    await interaction.reply({
-      content: `You have paid ${user.username} ${amount}`,
-      ephemeral: true,
+    console.log(user);
+    await interaction.editReply({
+      content: `You have paid ${user.user.username} ${amount}`,
     });
   }
 }
